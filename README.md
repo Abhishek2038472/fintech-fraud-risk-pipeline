@@ -1,36 +1,19 @@
-Data Pipeline & Ingestion
-Source: 800,000+ transactional records (fraudTrain.csv) streamed from Kaggle.
+### Database Architecture (`fintech_risk_dw`)
 
-Pipeline: Python batch ingestion (chunksize=100000) via SQLAlchemy and psycopg2.
+#### 1. Dimension Tables
+* **`dim_cardholders`** (Customer Entity)
+  * **Primary Key:** `cc_num` (VARCHAR)
+  * **Attributes:** `cc_num_last4`, `first_name`, `last_name`, `gender`, `job`, `dob`, `street`, `city`, `state`, `zip`, `lat`, `long`, `city_pop`
+* **`dim_merchants`** (Merchant Terminal Entity)
+  * **Primary Key:** `merchant_id` (INT)
+  * **Attributes:** `merchant` (TEXT), `category` (TEXT)
 
-Transforms: Masked card numbers (cc_num_last4), parsed timestamps into transactional dates/hours, and engineered the nocturnal risk flag (is_night_transaction: 11 PM – 5 AM).
+#### 2. Fact Table
+* **`fact_transactions`** (Clearinghouse Events)
+  * **Primary Key:** `trans_num` (VARCHAR)
+  * **Foreign Keys:** `cc_num` → `dim_cardholders(cc_num)`, `merchant_id` → `dim_merchants(merchant_id)`
+  * **Metrics & Flags:** `transaction_amount` (NUM), `merch_lat`, `merch_long`, `transaction_timestamp`, `transaction_date`, `transaction_hour`, `is_night_transaction` (INT), `distance_km` (NUMERIC), `is_fraud` (INT)
 
-
-Database Architecture (fintech_risk_dw)
-┌───────────────────────────────┐
-                  │        dim_cardholders        │
-                  ├───────────────────────────────┤
-                  │ PK  cc_num (VARCHAR)          │
-                  │     cc_num_last4 (VARCHAR)    │
-                  │     first_name, last_name     │
-                  │     gender, job, dob          │
-                  │     street, city, state, zip  │
-                  │     lat, long, city_pop       │
-                  └───────────────┬───────────────┘
-                                  │ 1
-                                  │
-                                  │ N
-┌─────────────────────────────┐   │   ┌───────────────────────────────┐
-│        dim_merchants        │   └───┤       fact_transactions       │
-├─────────────────────────────┤       ├───────────────────────────────┤
-│ PK  merchant_id (INT)       ├───────┤ PK  trans_num (VARCHAR)       │
-│     merchant (TEXT)         │ 1   N │ FK  cc_num (VARCHAR)          │
-│     category (TEXT)         │       │ FK  merchant_id (INT)         │
-└─────────────────────────────┘       │     transaction_amount (NUM)  │
-                                      │     merch_lat, merch_long     │
-                                      │     transaction_timestamp     │
-                                      │     transaction_date, hour    │
-                                      │     is_night_transaction (INT)│
-                                      │     distance_km (NUMERIC)     │
-                                      │     is_fraud (INT)            │
-                                      └───────────────────────────────┘
+#### 3. Entity Relationships
+* `dim_cardholders` **(1)** ────── **(N)** `fact_transactions`
+* `dim_merchants`   **(1)** ────── **(N)** `fact_transactions`
