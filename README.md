@@ -1,8 +1,8 @@
 # 💳 FinTech High-Frequency Fraud & Commercial Risk Data Warehouse
 
-An end-to-end payment gateway risk analytics platform evaluating **800,000 credit card transactions** representing **$63.24M in gross processed clearing volume**[cite: 7].
+An end-to-end payment gateway risk analytics platform evaluating **800,000 credit card transactions** representing **$63.24M in gross processed clearing volume**.
 
-The system automates chunked data ingestion via Python, constructs an indexed PostgreSQL Star Schema, executes spatial Haversine distance computations, and delivers a 2-page Power BI executive intelligence suite to isolate high-exposure threat corridors and nocturnal fraud spikes[cite: 7].
+The system automates chunked data ingestion via Python, constructs an indexed PostgreSQL Star Schema, executes spatial Haversine distance computations, and delivers a 2-page Power BI executive intelligence suite to isolate high-exposure threat corridors and nocturnal fraud spikes.
 
 ---
 
